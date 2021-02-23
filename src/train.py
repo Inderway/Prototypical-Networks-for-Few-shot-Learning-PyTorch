@@ -15,6 +15,7 @@ def init_seed(opt):
     '''
     Disable cudnn to maximize reproducibility
     '''
+    # 使cudnn无效以最大化复现率
     torch.cuda.cudnn_enabled = False
     np.random.seed(opt.manual_seed)
     torch.manual_seed(opt.manual_seed)
@@ -23,6 +24,8 @@ def init_seed(opt):
 
 def init_dataset(opt, mode):
     dataset = OmniglotDataset(mode=mode, root=opt.dataset_root)
+    # unique返回一个不包含重复数据的List
+    # dataset.y即为label集，此处为class集
     n_classes = len(np.unique(dataset.y))
     if n_classes < opt.classes_per_it_tr or n_classes < opt.classes_per_it_val:
         raise(Exception('There are not enough classes in the dataset in order ' +
@@ -33,9 +36,12 @@ def init_dataset(opt, mode):
 
 def init_sampler(opt, labels, mode):
     if 'train' in mode:
+        # 训练模式 每个小批的类数初始化
         classes_per_it = opt.classes_per_it_tr
+        # 取样数量为训练支持集和查询集之和
         num_samples = opt.num_support_tr + opt.num_query_tr
     else:
+        # 验证模式
         classes_per_it = opt.classes_per_it_val
         num_samples = opt.num_support_val + opt.num_query_val
 
@@ -198,10 +204,12 @@ def main():
     '''
     Initialize everything and train
     '''
+    # 返回所有的参数选项
     options = get_parser().parse_args()
+    # 创建输出路径
     if not os.path.exists(options.experiment_root):
         os.makedirs(options.experiment_root)
-
+    # 有cuda但命令行中没有指定
     if torch.cuda.is_available() and not options.cuda:
         print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
