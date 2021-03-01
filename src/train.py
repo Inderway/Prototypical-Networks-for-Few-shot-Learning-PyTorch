@@ -16,6 +16,7 @@ def init_seed(opt):
     Disable cudnn to maximize reproducibility
     '''
     # 使cudnn无效以最大化复现率
+    # cudnn使用非确定算法，会自动寻找最适合当前配置的算法
     torch.cuda.cudnn_enabled = False
     np.random.seed(opt.manual_seed)
     torch.manual_seed(opt.manual_seed)
@@ -71,6 +72,7 @@ def init_optim(opt, model):
     '''
     Initialize optimizer
     '''
+    # adam 优化， 有待研究
     return torch.optim.Adam(params=model.parameters(),
                             lr=opt.learning_rate)
 
@@ -110,12 +112,16 @@ def train(opt, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
 
     for epoch in range(opt.epochs):
         print('=== Epoch: {} ==='.format(epoch))
+        # iter 生成迭代器
         tr_iter = iter(tr_dataloader)
         model.train()
+        #tqdm显示进度条
         for batch in tqdm(tr_iter):
+            # 先把梯度置0
             optim.zero_grad()
             x, y = batch
             x, y = x.to(device), y.to(device)
+            # 获得输出，每个类
             model_output = model(x)
             loss, acc = loss_fn(model_output, target=y,
                                 n_support=opt.num_support_tr)
@@ -130,6 +136,7 @@ def train(opt, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
         if val_dataloader is None:
             continue
         val_iter = iter(val_dataloader)
+        # 切换到evalution
         model.eval()
         for batch in val_iter:
             x, y = batch

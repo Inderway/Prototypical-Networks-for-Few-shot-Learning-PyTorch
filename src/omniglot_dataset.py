@@ -45,9 +45,10 @@ class OmniglotDataset(data.Dataset):
         self.root = root
         self.transform = transform
         self.target_transform = target_transform
-
+        print('debug0')
         if download:
-            self.download()
+            print('debug1')
+            # self.download()
 
         if not self._check_exists():
             raise RuntimeError(
@@ -76,6 +77,7 @@ class OmniglotDataset(data.Dataset):
 
     def get_path_label(self, index):
         filename = self.all_items[index][0]
+        # print(filename)
         rot = self.all_items[index][-1]
         img = str.join(os.sep, [self.all_items[index][2], filename]) + rot
         target = self.idx_classes[self.all_items[index]
@@ -92,8 +94,8 @@ class OmniglotDataset(data.Dataset):
         from six.moves import urllib
         import zipfile
 
-        if self._check_exists():
-            return
+        #if self._check_exists():
+        #   return
 
         try:
             os.makedirs(os.path.join(self.root, self.splits_folder))
@@ -108,23 +110,28 @@ class OmniglotDataset(data.Dataset):
         for k, url in self.vinyals_split_sizes.items():
             print('== Downloading ' + url)
             data = urllib.request.urlopen(url)
-            filename = url.rpartition(os.sep)[-1]
+            filename = url.rpartition('/')[-1]
+
             file_path = os.path.join(self.root, self.splits_folder, filename)
-            with open(file_path, 'wb') as f:
-                f.write(data.read())
+            print(file_path)
+            # with open(file_path, 'wb') as f:
+            #     f.write(data.read())
 
         for url in self.urls:
             print('== Downloading ' + url)
             data = urllib.request.urlopen(url)
             filename = url.rpartition(os.sep)[2]
             file_path = os.path.join(self.root, self.raw_folder, filename)
-            with open(file_path, 'wb') as f:
-                f.write(data.read())
+            print(file_path)
+            # with open(file_path, 'wb') as f:
+            #     f.write(data.read())
             orig_root = os.path.join(self.root, self.raw_folder)
             print("== Unzip from " + file_path + " to " + orig_root)
-            zip_ref = zipfile.ZipFile(file_path, 'r')
-            zip_ref.extractall(orig_root)
-            zip_ref.close()
+            print("orig_root"+orig_root)
+            # zip_ref = zipfile.ZipFile(file_path, 'r')
+            # zip_ref.extractall(orig_root)
+            # zip_ref.close()
+        # dataset/
         file_processed = os.path.join(self.root, self.processed_folder)
         for p in ['images_background', 'images_evaluation']:
             for f in os.listdir(os.path.join(orig_root, p)):
@@ -158,6 +165,7 @@ def index_classes(items):
 
 
 def get_current_classes(fname):
+    print(fname)
     with open(fname) as f:
         classes = f.read().replace('/', os.sep).splitlines()
     return classes
