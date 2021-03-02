@@ -32,7 +32,7 @@ class OmniglotDataset(data.Dataset):
     raw_folder = 'raw'
     processed_folder = 'data'
 
-    def __init__(self, mode='train', root='..' + os.sep + 'dataset', transform=None, target_transform=None, download=True):
+    def __init__(self, mode='train', root='..' + os.sep + 'dataset', transform=None, target_transform=None, download=False):
         '''
         The items are (filename,category). The index of all the categories can be found in self.idx_classes
         Args:
@@ -45,10 +45,10 @@ class OmniglotDataset(data.Dataset):
         self.root = root
         self.transform = transform
         self.target_transform = target_transform
-        print('debug0')
+        # print('debug0')
         if download:
             print('debug1')
-            # self.download()
+            self.download()
 
         if not self._check_exists():
             raise RuntimeError(
@@ -114,8 +114,8 @@ class OmniglotDataset(data.Dataset):
 
             file_path = os.path.join(self.root, self.splits_folder, filename)
             print(file_path)
-            # with open(file_path, 'wb') as f:
-            #     f.write(data.read())
+            with open(file_path, 'wb') as f:
+                f.write(data.read())
 
         for url in self.urls:
             print('== Downloading ' + url)
