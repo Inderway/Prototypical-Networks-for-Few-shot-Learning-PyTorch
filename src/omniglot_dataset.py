@@ -123,18 +123,20 @@ class OmniglotDataset(data.Dataset):
             filename = url.rpartition(os.sep)[2]
             file_path = os.path.join(self.root, self.raw_folder, filename)
             print(file_path)
-            # with open(file_path, 'wb') as f:
-            #     f.write(data.read())
+            with open(file_path, 'wb') as f:
+                f.write(data.read())
+            # dataset/raw
             orig_root = os.path.join(self.root, self.raw_folder)
             print("== Unzip from " + file_path + " to " + orig_root)
-            print("orig_root"+orig_root)
-            # zip_ref = zipfile.ZipFile(file_path, 'r')
-            # zip_ref.extractall(orig_root)
-            # zip_ref.close()
-        # dataset/
+            zip_ref = zipfile.ZipFile(file_path, 'r')
+            zip_ref.extractall(orig_root)
+            zip_ref.close()
+        # dataset/data
         file_processed = os.path.join(self.root, self.processed_folder)
         for p in ['images_background', 'images_evaluation']:
             for f in os.listdir(os.path.join(orig_root, p)):
+                # dataset/data/image_background
+                # move all directories to dataset/data
                 shutil.move(os.path.join(orig_root, p, f), file_processed)
             os.rmdir(os.path.join(orig_root, p))
         print("Download finished.")
@@ -168,6 +170,9 @@ def get_current_classes(fname):
     print(fname)
     with open(fname) as f:
         classes = f.read().replace('/', os.sep).splitlines()
+    # 返回一个列表
+    # 每个元素的格式: <language>/character<idx>/rot<degree>
+    # 最后一个是旋转角度，共4个(0,90,180,270)
     return classes
 
 
