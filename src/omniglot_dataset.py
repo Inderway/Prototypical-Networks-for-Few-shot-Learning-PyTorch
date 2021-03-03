@@ -71,7 +71,7 @@ class OmniglotDataset(data.Dataset):
         # a 1x28x28 img
         self.x = map(load_img, paths, range(len(paths)))
         self.x = list(self.x)
-        # 数据预处理完毕，x为图片, y为标注
+        # 数据处理完毕，x为图片, y为标注
 
     def __getitem__(self, idx):
         x = self.x[idx]

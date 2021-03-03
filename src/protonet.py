@@ -32,9 +32,9 @@ class ProtoNet(nn.Module):
         )
 
     def forward(self, x):
+        # x为1x28x28
         x = self.encoder(x)
         # 以下操作保留x尺寸的第一个参数的维度，剩下数据合并成一个列表
         # 如: x的size为2x3x4, tensor([[[1,2,3,4],[5,6,7,8],[9,10,11,12]],[[13,14,15,16],[,17,18,19,20],[21,22,23,24]]])
         # 通过下面处理后变为tensor([[...],[...]])
-        # size(0)就是批的数量
         return x.view(x.size(0), -1)

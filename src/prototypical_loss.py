@@ -60,6 +60,7 @@ def prototypical_loss(input, target, n_support):
     - n_support: number of samples to keep in account when computing
       barycentres, for each one of the current classes
     '''
+    # input: 600x64  target:600 n_support=5
     target_cpu = target.to('cpu')
     input_cpu = input.to('cpu')
 

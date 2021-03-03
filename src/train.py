@@ -26,7 +26,7 @@ def init_seed(opt):
 def init_dataset(opt, mode):
     dataset = OmniglotDataset(mode=mode, root=opt.dataset_root)
     # unique返回一个不包含重复数据的List
-    # dataset.y即为label集，此处为class集
+    # dataset.x为tensor格式图片, y为label
     n_classes = len(np.unique(dataset.y))
     if n_classes < opt.classes_per_it_tr or n_classes < opt.classes_per_it_val:
         raise(Exception('There are not enough classes in the dataset in order ' +
@@ -114,6 +114,7 @@ def train(opt, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
         print('=== Epoch: {} ==='.format(epoch))
         # iter 生成迭代器
         tr_iter = iter(tr_dataloader)
+        #设置model为train模式
         model.train()
         #tqdm显示进度条
         for batch in tqdm(tr_iter):
@@ -121,8 +122,13 @@ def train(opt, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
             optim.zero_grad()
             x, y = batch
             x, y = x.to(device), y.to(device)
+
+            # x: 600x1x28x28 60个类，每个类5个support 5个query，共600张图片
+            # y: 600 600张图片的label
             # 获得输出，每个类
+            # 600x64
             model_output = model(x)
+            # print(model_output.size())
             loss, acc = loss_fn(model_output, target=y,
                                 n_support=opt.num_support_tr)
             loss.backward()
@@ -136,7 +142,7 @@ def train(opt, tr_dataloader, model, optim, lr_scheduler, val_dataloader=None):
         if val_dataloader is None:
             continue
         val_iter = iter(val_dataloader)
-        # 切换到evalution
+        # 切换到evalution 固定BatchNormalization和Dropout
         model.eval()
         for batch in val_iter:
             x, y = batch
