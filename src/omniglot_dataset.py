@@ -55,6 +55,7 @@ class OmniglotDataset(data.Dataset):
                 'Dataset not found. You can use download=True to download it')
         self.classes = get_current_classes(os.path.join(
             self.root, self.splits_folder, mode + '.txt'))
+        # dataset/data/
         self.all_items = find_items(os.path.join(
             self.root, self.processed_folder), self.classes)
 
@@ -144,14 +145,19 @@ class OmniglotDataset(data.Dataset):
 
 def find_items(root_dir, classes):
     retour = []
+    # 4个旋转角度
     rots = [os.sep + 'rot000', os.sep + 'rot090', os.sep + 'rot180', os.sep + 'rot270']
     for (root, dirs, files) in os.walk(root_dir):
         for f in files:
+            # D:\Github\Prototypical-Networks-for-Few-shot-Learning-PyTorch\dataset\data\Alphabet_of_the_Magi\character01
             r = root.split(os.sep)
             lr = len(r)
+            # Alphabet_of_the_Magi/character01
             label = r[lr - 2] + os.sep + r[lr - 1]
             for rot in rots:
+                # classes中有该label的png图片
                 if label + rot in classes and (f.endswith("png")):
+                    # png文件, 标注, 路径, 旋转角度
                     retour.extend([(f, label, root, rot)])
     print("== Dataset: Found %d items " % len(retour))
     return retour
