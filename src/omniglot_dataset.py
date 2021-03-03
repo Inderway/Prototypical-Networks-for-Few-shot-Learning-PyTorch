@@ -56,11 +56,15 @@ class OmniglotDataset(data.Dataset):
         self.classes = get_current_classes(os.path.join(
             self.root, self.splits_folder, mode + '.txt'))
         # dataset/data/
+        # [(file, label, root, rot),(),...]
         self.all_items = find_items(os.path.join(
             self.root, self.processed_folder), self.classes)
 
+        # {'language/character/rot': index, ...}
         self.idx_classes = index_classes(self.all_items)
 
+        # __len__重写了len， 返回all_items的元组数
+        # zip+*表示将元组还原成列表
         paths, self.y = zip(*[self.get_path_label(pl)
                               for pl in range(len(self))])
 
@@ -77,9 +81,12 @@ class OmniglotDataset(data.Dataset):
         return len(self.all_items)
 
     def get_path_label(self, index):
+        # 获得png文件
         filename = self.all_items[index][0]
         # print(filename)
+        #获得角度
         rot = self.all_items[index][-1]
+        # root/xxx.png + rot
         img = str.join(os.sep, [self.all_items[index][2], filename]) + rot
         target = self.idx_classes[self.all_items[index]
                                   [1] + self.all_items[index][-1]]
@@ -165,8 +172,11 @@ def find_items(root_dir, classes):
 
 def index_classes(items):
     idx = {}
+    # [(file, label, root, rot),(),...]
     for i in items:
-        if (not i[1] + i[-1] in idx):
+        # label+rot不在idx中
+        if not i[1] + i[-1] in idx:
+            # hash表, key为language/character/rot, value为index
             idx[i[1] + i[-1]] = len(idx)
     print("== Dataset: Found %d classes" % len(idx))
     return idx
