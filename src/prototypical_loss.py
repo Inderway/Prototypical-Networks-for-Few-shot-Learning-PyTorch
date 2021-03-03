@@ -61,21 +61,26 @@ def prototypical_loss(input, target, n_support):
       barycentres, for each one of the current classes
     '''
     # input: 600x64  target:600 n_support=5
+    # loss在cpu上计算，与GPU并行
     target_cpu = target.to('cpu')
     input_cpu = input.to('cpu')
 
     def supp_idxs(c):
         # FIXME when torch will support where as np
+        # nonzero返回输入中非零元素组成的tensor, 其维度为 非0元素个数n x input的维数
+        # c为classes中的一个类, 从target中取5个，返回5x1的tensor, squeeze去掉第一维的维度，返回长为5的tensor, 元素值为其在target中索引
         return target_cpu.eq(c).nonzero()[:n_support].squeeze(1)
 
     # FIXME when torch.unique will be available on cuda too
+    # 不重复的label列表 600
     classes = torch.unique(target_cpu)
     n_classes = len(classes)
     # FIXME when torch will support where as np
     # assuming n_query, n_target constants
-    # eq()判断是否相等
+    # eq返回target中与索引为0的类相同的类数(结果即为样本数, 因为每个类有10个样本)
     n_query = target_cpu.eq(classes[0].item()).sum().item() - n_support
 
+    # 每个类对应一个元组, 其中为5个其在target中的索引S
     support_idxs = list(map(supp_idxs, classes))
 
     prototypes = torch.stack([input_cpu[idx_list].mean(0) for idx_list in support_idxs])
