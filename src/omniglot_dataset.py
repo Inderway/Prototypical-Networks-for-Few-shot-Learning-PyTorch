@@ -65,11 +65,13 @@ class OmniglotDataset(data.Dataset):
 
         # __len__重写了len， 返回all_items的元组数
         # zip+*表示将元组还原成列表
+        # [(root/xxx.pngrot, language/character/rot)...]
         paths, self.y = zip(*[self.get_path_label(pl)
                               for pl in range(len(self))])
-
+        # a 1x28x28 img
         self.x = map(load_img, paths, range(len(paths)))
         self.x = list(self.x)
+        # 数据预处理完毕，x为图片, y为标注
 
     def __getitem__(self, idx):
         x = self.x[idx]
@@ -88,6 +90,7 @@ class OmniglotDataset(data.Dataset):
         rot = self.all_items[index][-1]
         # root/xxx.png + rot
         img = str.join(os.sep, [self.all_items[index][2], filename]) + rot
+        # language/character/rot
         target = self.idx_classes[self.all_items[index]
                                   [1] + self.all_items[index][-1]]
         if self.target_transform is not None:
@@ -193,18 +196,25 @@ def get_current_classes(fname):
 
 
 def load_img(path, idx):
+    # root/xxx.png, degree
     path, rot = path.split(os.sep + 'rot')
     if path in IMG_CACHE:
         x = IMG_CACHE[path]
     else:
         x = Image.open(path)
+        # 暂存
         IMG_CACHE[path] = x
     x = x.rotate(float(rot))
     x = x.resize((28, 28))
 
+    # 1x28x28
     shape = 1, x.size[0], x.size[1]
+    # 28x28
     x = np.array(x, np.float32, copy=False)
     x = 1.0 - torch.from_numpy(x)
+    # transpose转置
+    # contiguous 返回内存连续的tensor, 不然不能使用view
+    # 把x变成shape的维度
     x = x.transpose(0, 1).contiguous().view(shape)
 
     return x
