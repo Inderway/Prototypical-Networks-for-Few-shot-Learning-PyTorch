@@ -80,9 +80,13 @@ def prototypical_loss(input, target, n_support):
     # eq返回target中与索引为0的类相同的类数(结果即为样本数, 因为每个类有10个样本)
     n_query = target_cpu.eq(classes[0].item()).sum().item() - n_support
 
-    # 每个类对应一个元组, 其中为5个其在target中的索引S
+    # 每个类对应一个元组, 其中为5个其在target中的索引
     support_idxs = list(map(supp_idxs, classes))
-
+    # 每个idx_list为一个类的元组
+    # stack用于tensor拼接
+    # input为600x64, idx_list为5, input[idx_list]为 以idx_list的每个元素作为索引，其在input中的tensor的组合
+    # 比如idx_list=[1,2,3,4,5], 则input[idx_list]则为[input[1], input[2], input[3], input[4], input[5]] 5x64
+    # mean(0)即对第0维求均值, size为64
     prototypes = torch.stack([input_cpu[idx_list].mean(0) for idx_list in support_idxs])
     # FIXME when torch will support where as np
     query_idxs = torch.stack(list(map(lambda c: target_cpu.eq(c).nonzero()[n_support:], classes))).view(-1)
