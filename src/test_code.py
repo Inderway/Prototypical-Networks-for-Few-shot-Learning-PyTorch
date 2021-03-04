@@ -2,12 +2,10 @@ import numpy as np
 import os
 import torch
 from tqdm import tqdm
+from torch.nn import functional as F
 
 a=[1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3]
 a=torch.tensor(a)
-# 5
-idx_list=[10,11,12,13,14]
-idx_list=torch.tensor(idx_list)
 # 30x4
 input=torch.tensor([[0.1,0.2,0.3,0.4],
                     [0.5,0.6,0.7,0.8],
@@ -39,6 +37,8 @@ input=torch.tensor([[0.1,0.2,0.3,0.4],
                     [0.9, 1.0, 0.1, 0.2],
                     [0.3, 0.4, 0.5, 0.6],
                     [0.7, 0.8, 0.9, 1.0]])
-print(input[idx_list].mean(0))
-
-
+support_idxs=torch.tensor([[0,1,2,3,4],[5,6,7,8,9],
+                          [10,11,12,13,14],[15,16,17,18,19],
+                          [20,21,22,23,24],[25,26,27,28,29]])
+log_p_y = F.log_softmax(input, dim=1).view(4, 5, -1)
+print(support_idxs.max(1))
